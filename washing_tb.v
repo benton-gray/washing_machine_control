@@ -18,10 +18,16 @@ module washing_tb;
       # 10 tw = 1;
       ts = 0;
       #10 tw = 0;
+		# 1 start = 0;
     end
+	 
 	  # 200 $stop;
   end
-
+  
+  initial  begin
+		#160 door = 1;
+		#10 door = 0;
+	end
 
 
   wire  agitator, motor, pump, speed, water_fill, reset;

@@ -1,4 +1,4 @@
-module  timer(out, clk, reset,
+module  timer(clk, reset,
                 td, tf, tr, ts, tw, load);
   parameter   ONE = 1,
               TWO = 2,
@@ -7,28 +7,27 @@ module  timer(out, clk, reset,
               WIDTH = 8;
 
   //Port Declarations
-  output [WIDTH-1 : 0]  out;
   output td, tf, tr, ts, tw;
-  input  [TWO : 0] load;
+  input  [ONE : 0] load;
   input  clk, reset;
 
   //Nettype Definitions
   reg  [WIDTH-1 : 0]  out;
   reg  td, tf, tr, ts, tw;
-  wire [TWO  : 0] load;
+  wire [ONE  : 0] load;
   wire clk, reset;
 
   //Non-Blocking Concurrent Logic
   always @(posedge clk or posedge reset) begin
-    if (!reset)
-      out <= out + 1;
+    if (reset)
+		out <= 0;
     else begin
-      out <= 0;
+		out <= out + 1;
     end
   end
 
   //Blocking Combinatorial Logic
-  always @(out)
+  always @(*)
     if (reset) begin
       td = 0;
       tf = 0;
