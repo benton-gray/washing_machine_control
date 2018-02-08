@@ -26,7 +26,7 @@ module timer_tb;
 
   wire [7:0] value;
   wire  td, tf, tr, ts, tw;
-  timer c1 (value, clk, reset, td, tf, tr, ts, tw, load);
+  timer c1 (clk, reset, td, tf, tr, ts, tw, load);
 
 
   initial

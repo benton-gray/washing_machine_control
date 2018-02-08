@@ -18,7 +18,7 @@ module  timer(clk, reset,
   wire clk, reset;
 
   //Non-Blocking Concurrent Logic
-  always @(posedge clk or posedge reset) begin
+  always @(posedge clk ) begin//or posedge reset
     if (reset)
 		out <= 0;
     else begin
@@ -27,15 +27,17 @@ module  timer(clk, reset,
   end
 
   //Blocking Combinatorial Logic
-  always @(*)
-    if (reset) begin
+  always @(out or load)
+    begin
+	// if (reset) begin
       td = 0;
       tf = 0;
       tr = 0;
       ts = 0;
       tw = 0;
-    end
-    else begin
+  //  end
+  //  else 
+	// begin
       case(out)
         ONE: begin
           td = ONE;
@@ -55,7 +57,9 @@ module  timer(clk, reset,
           if (load == TWO)
             tw = ONE;
         end
+		 // default; begin
+		  //end
       endcase
-    end
+    end //end
 
 endmodule

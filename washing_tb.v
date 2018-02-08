@@ -2,6 +2,8 @@ module washing_tb;
 
   reg start = 0;
   reg door = 0;
+  reg clk = 0;
+  reg rst = 0;
   reg td, tf, tr, ts, tw;
   initial begin
 	  $dumpfile("washing.vcd");
@@ -29,13 +31,14 @@ module washing_tb;
 		#10 door = 0;
 	end
 
+	always #5 clk = !clk;
 
   wire  agitator, motor, pump, speed, water_fill, reset;
 
   washing_machine_control w1 (td, tf, tr, ts, tw,
                               door, start, agitator,
                               motor, pump, speed,
-                              water_fill, reset);
+                              water_fill, reset,clk,rst);
 
 
   initial

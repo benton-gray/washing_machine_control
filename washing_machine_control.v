@@ -2,7 +2,7 @@ module washing_machine_control( tdrain, tfill, trinse,
 					  										tspin, twash,
 					  										door, start, agitator,
 					  										motor, pump, speed,
-																water_fill, reset
+																water_fill, reset, clk, rst
 					  										);
   parameter idle = 0,
 						fill_1 = 1,
@@ -20,34 +20,32 @@ module washing_machine_control( tdrain, tfill, trinse,
 
   //Port Declarations
   input   tdrain, tfill, trinse,
-	    		tspin, twash, door, start;
+	    		tspin, twash, door, start, clk, rst;
   output  agitator, motor, pump,
 	    		speed, water_fill, reset;
 
   //Nettype
   wire  tdrain, tfill, trinse,
-	  		tspin, twash, start;
+	  		tspin, twash, start, clk, rst;
   reg   agitator, motor, pump,
 	  		speed, water_fill, reset;
 
   //State Register
-  reg [TWO : 0] current_state, next_state;
-	initial current_state = 3'b000;
-	initial next_state = 3'b000;
+  reg [3 : 0] current_state, next_state;
+	initial current_state = 4'b0000;
+	initial next_state = 4'b0000;
 
 	//Door can only open on spin cycle and when spin is done
-	//wire door = (current_state == spin && tspin == HIGH) ? HIGH : LOW;
+	always @(posedge clk or posedge rst) begin
+		if (rst) 
+			current_state <= idle;
+		else begin
+			current_state <= next_state;
+		end
+	end
 
   always @( * ) begin
-		if(start == HIGH && current_state == idle && door == LOW) 
-			next_state = next_state + 1;
-			
-		if(reset == HIGH && door == LOW)
-			next_state = next_state + 1;
-			
-		if(next_state == 8)
-			next_state = idle;
-		
+		reset = LOW;
 		case (current_state)
 			idle: begin
 				agitator 	 = LOW;
@@ -55,9 +53,8 @@ module washing_machine_control( tdrain, tfill, trinse,
 				pump 		 	 = LOW;
 				speed 	 	 = LOW;
 				water_fill 	 = LOW;
-				reset 	 	 = LOW;
 				if(start == HIGH) begin
-					current_state = next_state;
+					next_state = fill_1;
 					reset = HIGH;
 				end
 			end
@@ -67,9 +64,8 @@ module washing_machine_control( tdrain, tfill, trinse,
 				pump 		 	 = LOW;
 				speed 	 	 = LOW;
 				water_fill 	 = HIGH;
-				reset 		 = LOW;
 				if(tfill == HIGH) begin
-					current_state = next_state;
+					next_state = wash_1;
 					reset = HIGH;
 				end
 			end
@@ -79,9 +75,8 @@ module washing_machine_control( tdrain, tfill, trinse,
 				pump 		 	 = LOW;
 				speed 	 	 = LOW;
 				water_fill   = LOW;
-				reset 		 = LOW;
 				if(twash == HIGH) begin
-					current_state = next_state;
+					next_state = drain_1;
 					reset = HIGH;
 				end
 			end
@@ -91,9 +86,8 @@ module washing_machine_control( tdrain, tfill, trinse,
 				pump 		 	 = HIGH;
 				speed 	 	 = LOW;
 				water_fill   = LOW;
-				reset 		 = LOW;
 				if(tdrain == HIGH) begin
-					current_state = next_state;
+					next_state = fill_2;
 					reset = HIGH;
 				end
 			end
@@ -103,9 +97,8 @@ module washing_machine_control( tdrain, tfill, trinse,
 				pump 		 	 = LOW;
 				speed 	 	 = LOW;
 				water_fill   = HIGH;
-				reset 		 = LOW;
 				if(tfill == HIGH) begin
-					current_state = next_state;
+					next_state = wash_2;
 					reset = HIGH;
 				end
 			end
@@ -115,9 +108,8 @@ module washing_machine_control( tdrain, tfill, trinse,
 				pump 		 	 = LOW;
 				speed 	 	 = LOW;
 				water_fill   = LOW;
-				reset 		 = LOW;
 				if(twash == HIGH) begin
-					current_state = next_state;
+					next_state = drain_2;
 					reset = HIGH;
 				end
 			end
@@ -127,9 +119,8 @@ module washing_machine_control( tdrain, tfill, trinse,
 				pump 		 	 = HIGH;
 				speed 	 	 = LOW;
 				water_fill   = LOW;
-				reset 		 = LOW;
 				if(tdrain == HIGH) begin
-					current_state = next_state;
+					next_state = spin;
 					reset = HIGH;
 				end
 			end
@@ -140,7 +131,7 @@ module washing_machine_control( tdrain, tfill, trinse,
 					pump 		 	 = LOW;
 					speed 	 	 = LOW;
 					water_fill   = LOW;
-					reset 		 = LOW;
+					next_state   = hold;
 				end 
 				else begin
 					agitator 	 = LOW;
@@ -148,15 +139,24 @@ module washing_machine_control( tdrain, tfill, trinse,
 					pump 		 	 = LOW;
 					speed 	 	 = HIGH;
 					water_fill   = LOW;
-					reset 		 = LOW;
 					if(tspin == HIGH && door == LOW) begin
-						current_state = next_state;
+						next_state = idle;
 						reset = HIGH;
 					end
 				end
 			end
+			hold: begin
+					agitator 	 = LOW;
+					motor 	 	 = LOW;
+					pump 		 	 = LOW;
+					speed 	 	 = LOW;
+					water_fill   = LOW;
+					if(door == LOW) begin
+						next_state = spin;
+					end
+			end
 			default:
-				current_state = idle;
+				next_state = idle;
 		endcase
 
   end

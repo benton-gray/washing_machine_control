@@ -1,25 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer:
-//
-// Create Date:   08:48:43 02/01/2018
-// Design Name:   connect
-// Module Name:   Z:/Desktop/fpga/homework/washing-machine/connect_tb.v
-// Project Name:  washing-machine
-// Target Device:  
-// Tool versions:  
-// Description: 
-//
-// Verilog Test Fixture created by ISE for module: connect
-//
-// Dependencies:
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-////////////////////////////////////////////////////////////////////////////////
-
 module connect_tb;
 
 	// Inputs
@@ -27,6 +5,7 @@ module connect_tb;
 	reg start;
 	reg [1:0] load;
 	reg clk;
+	reg rst;
 
 	// Outputs
 	wire agitator;
@@ -34,38 +13,51 @@ module connect_tb;
 	wire pump;
 	wire speed;
 	wire water;
-
+	
 	// Instantiate the Unit Under Test (UUT)
 	connect uut (
 		.door(door), 
 		.start(start), 
 		.load(load), 
 		.clk(clk), 
+		.rst(rst),
 		.agitator(agitator), 
 		.motor(motor), 
 		.pump(pump), 
 		.speed(speed), 
 		.water(water)
 	);
-
+      
 	initial begin
 		// Initialize Inputs
-		door = 0;
+		
 		start = 0;
-		load = 0;
-		clk = 0;
+		load = 1;
+		//clk = 0;
+		rst = 1;
 
 		// Wait 100 ns for global reset to finish
 		#100;
+		rst = 0;
         
 		// Add stimulus here
 		#10
-		load = 1;
 		start = 1;
 		
+		#5
+		start = 0;
+		
+
+		#500 $finish;
 	end
-	
-  always #5 clk = !clk;
-      
+	initial begin
+	clk=0;
+  forever #5 clk = !clk;end
+
+	initial begin
+	door = 0;
+		#280 door = 1;
+		#10 door = 0;
+	end
 endmodule
 
